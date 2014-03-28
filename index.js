@@ -3,9 +3,7 @@ var nano = require('nano')('http://localhost:5984');
 var path = require('path');
 var express = require('express');
 var app = express();
-app.set('view engine', 'ejs');
 app.use(express.bodyParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 var db = undefined;
 nano.db.create('bitstamped', function(err, body) {
@@ -13,7 +11,7 @@ nano.db.create('bitstamped', function(err, body) {
   db = nano.db.use('bitstamped');
 });
 
-var interval = 5000;
+var interval = 1000 * 60;
 
 var requestBitstampData = function() {
   request('https://www.bitstamp.net/api/ticker/', function (error, response, body) {
@@ -23,7 +21,6 @@ var requestBitstampData = function() {
         tickerData[key] = Number(tickerData[key]);
       });
       tickerData.type = 'tickerdata';
-      tickerData.created = new Date().getTime();
       db.insert(tickerData);
     }
   });
@@ -33,8 +30,8 @@ setInterval(requestBitstampData, interval);
 
 var index = function(app) {
   app.get('/api/ticker/:timestamp', function(req, res) { 
-    var timestamp = req.params.timestamp;
-    db.view('bitstamped', 'tickerByTime', { limit: 10, descending: true, startkey: 0, endkey: timestamp }, function(err, body) {
+    var timestamp = Number(req.params.timestamp) / 1000;
+    db.view('bitstamped', 'tickerByTime', { limit: 1, startkey: timestamp }, function(err, body) {      
       if (!err) {
         res.json(body.rows);
       }

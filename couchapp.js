@@ -13,6 +13,6 @@ module.exports = ddoc;
 ddoc.views.tickerByTime = {
   map: function(doc) {
     if (doc.type === 'tickerdata')
-      emit(doc.created, doc);
+      emit(doc.timestamp, doc);
   }
 }
