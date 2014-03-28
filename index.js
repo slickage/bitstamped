@@ -15,7 +15,7 @@ var interval = 1000 * 60;
 
 var requestBitstampData = function() {
   request('https://www.bitstamp.net/api/ticker/', function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       var tickerData = JSON.parse(body);
       Object.keys(tickerData).forEach(function(key) {
         tickerData[key] = Number(tickerData[key]);
@@ -30,11 +30,11 @@ setInterval(requestBitstampData, interval);
 
 var index = function(app) {
   app.get('/api/ticker/:timestamp', function(req, res) { 
-    var timestamp = Number(req.params.timestamp)/1000;
-    var params = { limit:1, descending: true, startkey: timestamp };
+    var timestamp = Number(req.params.timestamp) / 1000;
+    var params = { limit: 1, descending: true, startkey: timestamp };
     db.view('bitstamped', 'tickerByTime', params, function(err, body) {      
       if (!err) {
-        res.json(body.rows);
+        res.json(body.rows[0]);
       }
     }); 
   });
