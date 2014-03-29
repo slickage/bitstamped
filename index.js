@@ -11,8 +11,6 @@ nano.db.create('bitstamped', function(err, body) {
   db = nano.db.use('bitstamped');
 });
 
-var interval = 1000 * 60;
-
 var requestBitstampData = function() {
   request('https://www.bitstamp.net/api/ticker/', function (error, response, body) {
     if (!error && response.statusCode === 200) {
@@ -25,6 +23,8 @@ var requestBitstampData = function() {
     }
   });
 };
+
+var interval = 1000 * 60;
 
 setInterval(requestBitstampData, interval);
 
