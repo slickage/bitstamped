@@ -28,16 +28,24 @@ var requestBitstampData = function() {
 
 setInterval(requestBitstampData, interval);
 
-var index = function(app) {
+var routes = function(app) {
   app.get('/api/ticker/:timestamp', function(req, res) { 
-    var timestamp = Number(req.params.timestamp) / 1000;
-    var params = { limit: 1, descending: true, startkey: timestamp };
-    db.view('bitstamped', 'tickerByTime', params, function(err, body) {      
-      if (!err) {
-        res.json(body.rows[0]);
-      }
-    }); 
+    res.json(getTicker(req.params.timestamp));
   });
 };
 
-module.exports = index;
+var getTicker = function(timestamp) {
+  timestamp = Number(timestamp) / 1000; // discard milliseconds
+  var params = { limit: 1, descending: true, startkey: timestamp };
+  db.view('bitstamped', 'tickerByTime', params, function(err, body) {      
+    if (!err) {
+      return body.rows[0];
+    }
+    return null;
+  }); 
+};
+
+module.exports = { 
+  routes: routes,
+  getTicker: getTicker
+ };
