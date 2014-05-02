@@ -2,12 +2,28 @@ var request = require('request');
 var nano = require('nano')('http://localhost:5984');
 var express = require('express');
 var app = express();
+var couchapp = require('couchapp');
+var ddoc = require('./couchapp');
+var dbName = 'bitstamped';
 app.use(express.bodyParser());
 
 var db;
-nano.db.create('bitstamped', function(err, body) {
-  if (!err) { console.log('Database created.'); }
-  db = nano.db.use('bitstamped');
+nano.db.get(dbName, function(err) {
+  if (err) {
+    nano.db.create(dbName, function(err) {
+      if (err) {
+        return process.exit(1);
+      }
+      db = nano.use(dbName);
+      var dbUrl = 'http://localhost:5984/' + dbName;
+      couchapp.createApp(ddoc, dbUrl, function(app) {
+        app.push();
+      });
+    });
+  }
+  else {
+    db = nano.use(dbName);
+  }
 });
 
 var requestBitstampData = function() {
