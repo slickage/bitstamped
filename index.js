@@ -1,11 +1,12 @@
 var request = require('request');
 var nano = require('nano')('http://localhost:5984');
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
 var couchapp = require('couchapp');
 var ddoc = require('./couchapp');
 var dbName = 'bitstamped';
-app.use(express.bodyParser());
+app.use(bodyParser());
 
 var db;
 nano.db.get(dbName, function(err) {
