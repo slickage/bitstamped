@@ -26,7 +26,7 @@ var getTicker = function(timestamp, cb) {
 api.route('/bitstamped/:timestamp').get(function(req, res) {
   getTicker(req.params.timestamp, function(err, body) {
     if (!err) {
-      var tickerData = JSON.parse(body.rows[0]).value;
+      var tickerData = body.rows[0].value;
       delete tickerData._id;
       delete tickerData._rev;
       delete tickerData.type;
