@@ -23,10 +23,14 @@ var getTicker = function(timestamp, cb) {
   db.view('bitstamped', 'tickerByTime', { limit: 1, descending: true, startkey: timestamp }, cb);
 };
 
-api.route('/api/ticker/:timestamp').get(function(req, res) {
+api.route('/bistamped/:timestamp').get(function(req, res) {
   getTicker(req.params.timestamp, function(err, body) {
     if (!err) {
-      res.json(body.rows[0]);
+      var tickerData = body.rows[0].value;
+      delete tickerData._id;
+      delete tickerData._rev;
+      delete tickerData.type;
+      res.json(tickerData);
       res.end();
     }
     else {
