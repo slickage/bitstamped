@@ -1,12 +1,9 @@
-var couchapp = require('couchapp'),
-    path = require('path');
-
-ddoc = {
+var ddoc = {
   _id: '_design/bitstamped',
   views: {},
   lists: {},
-  shows: {} 
-}
+  shows: {}
+};
 
 module.exports = ddoc;
 
@@ -15,4 +12,4 @@ ddoc.views.tickerByTime = {
     if (doc.type === 'tickerdata')
       emit(doc.timestamp, doc);
   }
-}
+};

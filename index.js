@@ -1,12 +1,9 @@
 var request = require('request');
-// var express = require('express');
-// var bodyParser = require('body-parser');
-// var app = express();
-var couchapp = require('couchapp');
-var ddoc = require('./couchapp');
+var express = require('express');
+var api = express.Router();
+var ddoc = require('./ddoc');
 var dbName = 'bitstamped';
-// app.use(bodyParser());
-var db, nano;
+var db;
 
 function requestBitstampData() {
   request('https://www.bitstamp.net/api/ticker/', function (error, response, body) {
@@ -26,35 +23,36 @@ var getTicker = function(timestamp, cb) {
   db.view('bitstamped', 'tickerByTime', { limit: 1, descending: true, startkey: timestamp }, cb);
 };
 
-// var routes = function(app) {
-//   app.get('/api/ticker/:timestamp', function(req, res) {
-//     getTicker(req.params.timestamp, function(err, body) {
-//       if (!err) {
-//         res.json(body.rows[0]);
-//         res.end();
-//       }
-//       else {
-//         res.json({ error: err });
-//         res.end();
-//       }
-//     });
-//   });
-// };
+api.route('/api/ticker/:timestamp').get(function(req, res) {
+  getTicker(req.params.timestamp, function(err, body) {
+    if (!err) {
+      res.json(body.rows[0]);
+      res.end();
+    }
+    else {
+      res.json({ error: err });
+      res.end();
+    }
+  });
+});
 
  var init = function(dbRootUrl, interval) {
     dbRootUrl = dbRootUrl || 'http://localhost:5984';
-    nano = require('nano')(dbRootUrl);
+    var nano = require('nano')(dbRootUrl);
     var reqInterval = interval || 1000 * 60;
     nano.db.get(dbName, function(err) {
     if (err) {
       nano.db.create(dbName, function(err) {
         if (err) {
-          console.log(err);
+          console.log('Error creating database\n' + err);
           return process.exit(1);
         }
         db = nano.use(dbName);
-        couchapp.createApp(ddoc, dbRootUrl + dbName, function(app) {
-          app.push();
+        db.insert(ddoc, function(err) {
+          if (err) {
+            console.log('Error pushing design document\n' + err);
+            return process.exit(1);
+          }
           setInterval(requestBitstampData, reqInterval);
         });
       });
@@ -68,6 +66,6 @@ var getTicker = function(timestamp, cb) {
 
 module.exports = {
   init: init,
-//  routes: routes,
+  api: api,
   getTicker: getTicker
  };
