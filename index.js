@@ -57,6 +57,7 @@ api.route('/bitstamped/:timestamp').get(function(req, res) {
             console.log('Error pushing design document\n' + err);
             return process.exit(1);
           }
+          requestBitstampData();
           setInterval(requestBitstampData, reqInterval);
         });
       });
